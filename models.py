@@ -58,11 +58,17 @@ class DCGenerator(nn.Module):
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
 
-        self.up_conv1 = 
-        self.up_conv2 = 
-        self.up_conv3 = 
-        self.up_conv4 = 
-        self.up_conv5 = 
+        self.up_conv1 = conv(in_channels=100, out_channels=256, padding=4, stride=2, kernel_size=3)
+        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=1, padding=0)
+        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=1, padding=0)
+        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=1, padding=0)
+        self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=1, padding=0)
+
+        self.relu1 = nn.ReLU()
+        self.relu2 = nn.ReLU()
+        self.relu3 = nn.ReLU()
+        self.relu4 = nn.ReLU()
+        self.relu5 = nn.ReLU()
 
     def forward(self, z):
         """Generates an image given a sample of random noise.
@@ -80,7 +86,9 @@ class DCGenerator(nn.Module):
         ##   FILL THIS IN: FORWARD PASS   ##
         ###########################################
 
-        pass
+
+        return z
+
 
 
 class ResnetBlock(nn.Module):
@@ -145,19 +153,40 @@ class DCDiscriminator(nn.Module):
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
 
-        self.conv1 = 
-        self.conv2 = 
-        self.conv3 = 
-        self.conv4 = 
-        self.conv5 = 
+        self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=2, kernel_size=4)
+        self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=2, kernel_size=4)
+        self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4)
+        self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=2, kernel_size=4)
+        self.conv5 = conv(in_channels=256, out_channels=1, padding=0, kernel_size=4)
+
+        self.relu1 = nn.ReLU()
+        self.relu2 = nn.ReLU()
+        self.relu3 = nn.ReLU()
+        self.relu4 = nn.ReLU()
+        self.relu5 = nn.ReLU()
 
     def forward(self, x):
 
         ###########################################
         ##   FILL THIS IN: FORWARD PASS   ##
         ###########################################
+        x = self.conv1(x)
+        x = self.relu1(x)
+        x = nn.InstanceNorm2d(x)
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = nn.InstanceNorm2d(x)
+        x = self.conv3(x)
+        x = self.relu3(x)
+        x = nn.InstanceNorm2d(x)
+        x = self.conv4(x)
+        x = self.relu4(x)
+        x = nn.InstanceNorm2d(x)
+        x = self.conv5(x)
+        x = self.relu5(x)
+        x = nn.InstanceNorm2d(x)
 
-        pass
+        return x
 
 
 class PatchDiscriminator(nn.Module):
