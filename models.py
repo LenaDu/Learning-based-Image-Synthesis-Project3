@@ -64,11 +64,7 @@ class DCGenerator(nn.Module):
         self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=1, padding=0)
         self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=1, padding=0)
 
-        self.relu1 = nn.ReLU()
-        self.relu2 = nn.ReLU()
-        self.relu3 = nn.ReLU()
-        self.relu4 = nn.ReLU()
-        self.relu5 = nn.ReLU()
+        self.relu = nn.ReLU()
 
     def forward(self, z):
         """Generates an image given a sample of random noise.
@@ -85,6 +81,21 @@ class DCGenerator(nn.Module):
         ###########################################
         ##   FILL THIS IN: FORWARD PASS   ##
         ###########################################
+        z = self.up_conv1(z)
+        z = self.relu(z)
+
+        z = self.up_conv2(z)
+        z = self.relu(z)
+
+        z = self.up_conv3(z)
+        z = self.relu(z)
+
+        z = self.up_conv4(z)
+        z = self.relu(z)
+
+        z = self.up_conv5(z)
+        z = self.relu(z)
+
 
 
         return z
@@ -112,16 +123,16 @@ class CycleGenerator(nn.Module):
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
 
-        # 1. Define the encoder part of the generator (that extracts features from the input image)
-        self.conv1 = 
-        self.conv2 = 
-
-        # 2. Define the transformation part of the generator
-        self.resnet_block = 
-
-        # 3. Define the decoder part of the generator (that builds up the output image from features)
-        self.up_conv1 = 
-        self.up_conv2 = 
+        # # 1. Define the encoder part of the generator (that extracts features from the input image)
+        # self.conv1 =
+        # self.conv2 =
+        #
+        # # 2. Define the transformation part of the generator
+        # self.resnet_block =
+        #
+        # # 3. Define the decoder part of the generator (that builds up the output image from features)
+        # self.up_conv1 =
+        # self.up_conv2 =
 
     def forward(self, x):
         """Generates an image conditioned on an input image.
@@ -159,11 +170,7 @@ class DCDiscriminator(nn.Module):
         self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=2, kernel_size=4)
         self.conv5 = conv(in_channels=256, out_channels=1, padding=0, kernel_size=4)
 
-        self.relu1 = nn.ReLU()
-        self.relu2 = nn.ReLU()
-        self.relu3 = nn.ReLU()
-        self.relu4 = nn.ReLU()
-        self.relu5 = nn.ReLU()
+        self.relu = nn.ReLU()
 
     def forward(self, x):
 
@@ -171,20 +178,19 @@ class DCDiscriminator(nn.Module):
         ##   FILL THIS IN: FORWARD PASS   ##
         ###########################################
         x = self.conv1(x)
-        x = self.relu1(x)
-        x = nn.InstanceNorm2d(x)
+        x = self.relu(x)
+
         x = self.conv2(x)
-        x = self.relu2(x)
-        x = nn.InstanceNorm2d(x)
+        x = self.relu(x)
+
         x = self.conv3(x)
-        x = self.relu3(x)
-        x = nn.InstanceNorm2d(x)
+        x = self.relu(x)
+
         x = self.conv4(x)
-        x = self.relu4(x)
-        x = nn.InstanceNorm2d(x)
+        x = self.relu(x)
+
         x = self.conv5(x)
-        x = self.relu5(x)
-        x = nn.InstanceNorm2d(x)
+        x = self.relu(x)
 
         return x
 

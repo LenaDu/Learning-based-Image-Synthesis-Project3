@@ -169,19 +169,20 @@ def training_loop(train_dataloader, opts):
             # FILL THIS IN
             # 1. Compute the discriminator loss on real images
             # D_real_loss = torch.mean((D(real_images) - 1)**2)
-            D_real_loss = 
+            D_real_loss =  torch.mean((D(real_images) - 1)**2)
 
             # 2. Sample noise
-            noise = 
+            noise = torch.randn(real_images.size,100,1,1)
 
             # 3. Generate fake images from the noise
-            fake_images = 
+            fake_images = G(noise)
+
 
             # 4. Compute the discriminator loss on the fake images
             # D_fake_loss = torch.mean((D(fake_images.detach())) ** 2)
-            D_fake_loss = 
+            D_fake_loss = torch.mean((D(fake_images.detach())) ** 2)
 
-            D_total_loss = 
+            D_total_loss = (D_real_loss + D_fake_loss) / 2
 
             # update the discriminator D
             d_optimizer.zero_grad()
@@ -194,13 +195,13 @@ def training_loop(train_dataloader, opts):
 
             # FILL THIS IN
             # 1. Sample noise
-            noise = 
+            noise = torch.randn(100, 1, 1)
 
             # 2. Generate fake images from the noise
-            fake_images = 
+            fake_images = G(noise)
 
             # 3. Compute the generator loss
-            G_loss = 
+            G_loss = torch.mean((D(fake_images.detach()) - 1) ** 2)
 
             # update the generator G
             g_optimizer.zero_grad()
@@ -282,8 +283,8 @@ if __name__ == '__main__':
     batch_size = opts.batch_size
     opts.sample_dir = os.path.join('output/', opts.sample_dir,
                                    '%s_%s' % (os.path.basename(opts.data), opts.data_preprocess))
-    if opts.use_diffaug:
-        opts.sample_dir += '_diffaug'
+    # if opts.use_diffaug:
+    #     opts.sample_dir += '_diffaug'
 
     if os.path.exists(opts.sample_dir):
         cmd = 'rm %s/*' % opts.sample_dir
