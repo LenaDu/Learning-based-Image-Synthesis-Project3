@@ -37,7 +37,7 @@ def get_data_loader(data_path, opts):
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
-
+    train_transform = basic_transform
     if opts.data_preprocess == 'basic':
         train_transform = basic_transform
     elif opts.data_preprocess == 'deluxe':

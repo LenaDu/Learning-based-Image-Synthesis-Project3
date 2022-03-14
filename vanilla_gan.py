@@ -195,7 +195,7 @@ def training_loop(train_dataloader, opts):
 
             # FILL THIS IN
             # 1. Sample noise
-            noise = torch.randn(100, 1, 1)
+            noise = torch.randn(batch_size, 100, 1, 1)
 
             # 2. Generate fake images from the noise
             fake_images = G(noise)
