@@ -172,7 +172,8 @@ def training_loop(train_dataloader, opts):
             D_real_loss =  torch.mean((D(real_images) - 1)**2)
 
             # 2. Sample noise
-            noise = torch.randn(real_images.size,100,1,1)
+            print(real_images.size)
+            noise = torch.randn(batch_size,100,1,1)
 
             # 3. Generate fake images from the noise
             fake_images = G(noise)
@@ -236,6 +237,7 @@ def main(opts):
     # Create a dataloader for the training images
     dataloader = get_data_loader(opts.data, opts)
 
+
     # Create checkpoint and sample directories
     utils.create_dir(opts.checkpoint_dir)
     utils.create_dir(opts.sample_dir)
@@ -287,7 +289,8 @@ if __name__ == '__main__':
     #     opts.sample_dir += '_diffaug'
 
     if os.path.exists(opts.sample_dir):
-        cmd = 'rm %s/*' % opts.sample_dir
+        # cmd = 'rm %s/*' % opts.sample_dir
+        cmd = 'del %s' % opts.sample_dir.replace('./','').replace('/','\\') # able to run on Windows
         os.system(cmd)
     logger = SummaryWriter(opts.sample_dir)
     print(opts)
