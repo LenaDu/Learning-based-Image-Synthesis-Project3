@@ -38,16 +38,21 @@ def get_data_loader(data_path, opts):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
     train_transform = basic_transform
-    # if opts.data_preprocess == 'basic':
-    #     train_transform = basic_transform
-    # elif opts.data_preprocess == 'deluxe':
-    #     # todo: add your code here: below are some ideas for your reference
-    #     load_size = int(1.1 * opts.image_size)
-    #     osize = [load_size, load_size]
-    #     transforms.Resize(osize, Image.BICUBIC)
-    #     transforms.RandomCrop(opts.image_size)
-    #     transforms.RandomHorizontalFlip()
-    #     pass
+    if opts.data_preprocess == 'basic':
+        train_transform = basic_transform
+    elif opts.data_preprocess == 'deluxe':
+        # todo: add your code here: below are some ideas for your reference
+        # load_size = int(1.1 * opts.image_size)
+        # osize = [load_size, load_size]
+        # transforms.Resize(osize, Image.BICUBIC)
+        # transforms.RandomCrop(opts.image_size)
+        # transforms.RandomHorizontalFlip()
+        train_transform = transforms.Compose([
+            transforms.Resize(opts.image_size , Image.BICUBIC),
+           transforms.CenterCrop(opts.image_size),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        ])
 
     dataset = CustomDataSet(os.path.join('data/', data_path), opts.ext, train_transform)
     dloader = DataLoader(dataset=dataset, batch_size=opts.batch_size, shuffle=True, num_workers=opts.num_workers)

@@ -169,7 +169,7 @@ def training_loop(train_dataloader, opts):
             # FILL THIS IN
             # 1. Compute the discriminator loss on real images
             # D_real_loss = torch.mean((D(real_images) - 1)**2)
-            D_real_loss =  torch.mean((D(real_images) - 1)**2)
+            D_real_loss = torch.mean((D(real_images) - 1)**2)
 
             # 2. Sample noise
             print(real_images.size)
