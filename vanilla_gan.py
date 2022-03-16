@@ -29,7 +29,6 @@ from torch.utils.tensorboard import SummaryWriter
 import utils
 from data_loader import get_data_loader
 from models import DCGenerator, DCDiscriminator
-
 from diff_augment import DiffAugment
 policy = 'color,translation,cutout'
 
@@ -172,12 +171,11 @@ def training_loop(train_dataloader, opts):
             D_real_loss = torch.mean((D(real_images) - 1)**2)
 
             # 2. Sample noise
-            print(real_images.size)
-            noise = torch.randn(batch_size,100,1,1)
+            # print(real_images.size)
+            noise = torch.randn(batch_size, 100, 1, 1)
 
             # 3. Generate fake images from the noise
             fake_images = G(noise)
-
 
             # 4. Compute the discriminator loss on the fake images
             # D_fake_loss = torch.mean((D(fake_images.detach())) ** 2)
@@ -189,6 +187,7 @@ def training_loop(train_dataloader, opts):
             d_optimizer.zero_grad()
             D_total_loss.backward()
             d_optimizer.step()
+            D.train()
 
             ###########################################
             ###          TRAIN THE GENERATOR        ###
@@ -208,6 +207,7 @@ def training_loop(train_dataloader, opts):
             g_optimizer.zero_grad()
             G_loss.backward()
             g_optimizer.step()
+            G.train()
 
             # Print the log info
             if iteration % opts.log_step == 0:

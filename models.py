@@ -96,8 +96,6 @@ class DCGenerator(nn.Module):
         z = self.up_conv5(z)
         z = self.relu(z)
 
-
-
         return z
 
 
