@@ -100,8 +100,10 @@ def checkpoint(iteration, G, D, opts):
 
 
 def save_samples(G, fixed_noise, iteration, opts):
-    generated_images = G(fixed_noise)
 
+    print(fixed_noise.shape)
+
+    generated_images = G(fixed_noise)
     generated_images = utils.to_data(generated_images)
 
     grid = create_image_grid(generated_images)
@@ -152,6 +154,7 @@ def training_loop(train_dataloader, opts):
     # Generate fixed noise for sampling from the generator
     fixed_noise = sample_noise(opts.noise_size)  # batch_size x noise_size x 1 x 1
 
+    # print(fixed_noise)
     iteration = 1
 
     total_train_iters = opts.num_epochs * len(train_dataloader)
@@ -185,7 +188,7 @@ def training_loop(train_dataloader, opts):
             # D_fake_loss = torch.mean((D(fake_images.detach())) ** 2)
             D_fake_loss = torch.mean((D.forward(fake_images)) ** 2)
 
-            D_total_loss = (D_real_loss + D_fake_loss)
+            D_total_loss = (D_real_loss + D_fake_loss) / 2
 
             # update the discriminator D
             d_optimizer.zero_grad()
@@ -214,11 +217,11 @@ def training_loop(train_dataloader, opts):
             g_optimizer.step()
             G.train()
             # with open('dump.txt', mode='a') as f:
-                    #     for name, param in G.named_parameters():
-                    #         if param.requires_grad:
-                    #             f.write(name + str(param.data))
-                    # f.write(str([x.grad for x in g_optimizer.param_groups[0]['params']]))
-                    # f.write('\n')
+            #         #     for name, param in G.named_parameters():
+            #         #         if param.requires_grad:
+            #         #             f.write(name + str(param.data))
+            #         f.write(str(([sum(x.grad) for x in g_optimizer.param_groups[0]['params']])))
+            #         f.write('\n')
 
             # Print the log info
             if iteration % opts.log_step == 0:
@@ -267,8 +270,8 @@ def create_parser():
     parser.add_argument('--noise_size', type=int, default=100)
 
     # Training hyper-parameters
-    parser.add_argument('--num_epochs', type=int, default=500)
-    parser.add_argument('--batch_size', type=int, default=16, help='The number of images in a batch.')
+    parser.add_argument('--num_epochs', type=int, default=1000)
+    parser.add_argument('--batch_size', type=int, default=32, help='The number of images in a batch.')
     parser.add_argument('--num_workers', type=int, default=0, help='The number of threads to use for the DataLoader.')
     parser.add_argument('--lr', type=float, default=0.0002, help='The learning rate (default 0.0002)')
     parser.add_argument('--beta1', type=float, default=0.5)

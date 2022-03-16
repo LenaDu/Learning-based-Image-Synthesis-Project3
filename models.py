@@ -58,10 +58,10 @@ class DCGenerator(nn.Module):
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
 
-        self.up_conv1 = up_conv(in_channels=100, out_channels=256, kernel_size=3, padding=1)
-        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=3, padding=1)
-        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=3, padding=1)
-        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=3, padding=1)
+        self.up_conv1 = conv(in_channels=100, out_channels=256, stride=1, kernel_size=2, padding=2, norm='instance')
+        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=3, padding=1, norm='instance')
+        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=3, padding=1, norm='instance')
+        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=3, padding=1, norm='instance')
         self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=3, padding=1)
 
         self.relu = nn.ReLU()
@@ -84,18 +84,23 @@ class DCGenerator(nn.Module):
         ###########################################
         z = self.up_conv1(z)
         z = self.relu(z)
+        # print("after layer1: ", z.shape)
 
         z = self.up_conv2(z)
         z = self.relu(z)
+        # print("after layer2: ", z.shape)
 
         z = self.up_conv3(z)
         z = self.relu(z)
+        # print("after layer3: ", z.shape)
 
         z = self.up_conv4(z)
         z = self.relu(z)
+        # print("after layer4: ", z.shape)
 
         z = self.up_conv5(z)
         z = self.tanh(z)
+        # print("after layer5: ", z.shape)
 
         return z
 
@@ -163,11 +168,11 @@ class DCDiscriminator(nn.Module):
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
 
-        self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=2, kernel_size=4)
-        self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=2, kernel_size=4)
-        self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4)
-        self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=2, kernel_size=4)
-        self.conv5 = conv(in_channels=256, out_channels=1, padding=1, kernel_size=4)
+        self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=1, kernel_size=4, norm='instance')
+        self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=1, kernel_size=4, norm='instance')
+        self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=1, kernel_size=4, norm='instance')
+        self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=1, kernel_size=4, norm='instance')
+        self.conv5 = nn.Conv2d(in_channels=256, out_channels=1, padding=0, kernel_size=4)
 
         self.relu = nn.ReLU()
 
@@ -189,7 +194,6 @@ class DCDiscriminator(nn.Module):
         x = self.relu(x)
 
         x = self.conv5(x)
-        x = self.relu(x)
 
         return x
 
