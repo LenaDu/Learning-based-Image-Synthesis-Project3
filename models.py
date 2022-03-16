@@ -58,13 +58,14 @@ class DCGenerator(nn.Module):
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
 
-        self.up_conv1 = conv(in_channels=100, out_channels=256, padding=4, stride=2, kernel_size=3)
-        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=1, padding=0)
-        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=1, padding=0)
-        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=1, padding=0)
-        self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=1, padding=0)
+        self.up_conv1 = up_conv(in_channels=100, out_channels=256, kernel_size=3, padding=1)
+        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=3, padding=1)
+        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=3, padding=1)
+        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=3, padding=1)
+        self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=3, padding=1)
 
         self.relu = nn.ReLU()
+        self.tanh = nn.Tanh()
 
     def forward(self, z):
         """Generates an image given a sample of random noise.
@@ -94,7 +95,7 @@ class DCGenerator(nn.Module):
         z = self.relu(z)
 
         z = self.up_conv5(z)
-        z = self.relu(z)
+        z = self.tanh(z)
 
         return z
 
@@ -166,7 +167,7 @@ class DCDiscriminator(nn.Module):
         self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=2, kernel_size=4)
         self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4)
         self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=2, kernel_size=4)
-        self.conv5 = conv(in_channels=256, out_channels=1, padding=0, kernel_size=4)
+        self.conv5 = conv(in_channels=256, out_channels=1, padding=1, kernel_size=4)
 
         self.relu = nn.ReLU()
 

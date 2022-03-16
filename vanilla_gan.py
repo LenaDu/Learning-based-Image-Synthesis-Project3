@@ -101,6 +101,7 @@ def checkpoint(iteration, G, D, opts):
 
 def save_samples(G, fixed_noise, iteration, opts):
     generated_images = G(fixed_noise)
+
     generated_images = utils.to_data(generated_images)
 
     grid = create_image_grid(generated_images)
@@ -143,6 +144,7 @@ def training_loop(train_dataloader, opts):
     # Create generators and discriminators
     G, D = create_model(opts)
 
+    print(opts)
     # Create optimizers for the generators and discriminators
     g_optimizer = optim.Adam(G.parameters(), opts.lr, [opts.beta1, opts.beta2])
     d_optimizer = optim.Adam(D.parameters(), opts.lr, [opts.beta1, opts.beta2])
@@ -153,6 +155,7 @@ def training_loop(train_dataloader, opts):
     iteration = 1
 
     total_train_iters = opts.num_epochs * len(train_dataloader)
+
 
     for epoch in range(opts.num_epochs):
 
@@ -172,16 +175,17 @@ def training_loop(train_dataloader, opts):
 
             # 2. Sample noise
             # print(real_images.size)
-            noise = torch.randn(batch_size, 100, 1, 1)
+            # noise = torch.randn(batch_size, 100, 1, 1, requires_grad=True)
+            noise = sample_noise(100)
 
             # 3. Generate fake images from the noise
-            fake_images = G(noise)
+            fake_images = G.forward(noise)
 
             # 4. Compute the discriminator loss on the fake images
             # D_fake_loss = torch.mean((D(fake_images.detach())) ** 2)
-            D_fake_loss = torch.mean((D(fake_images.detach())) ** 2)
+            D_fake_loss = torch.mean((D.forward(fake_images)) ** 2)
 
-            D_total_loss = (D_real_loss + D_fake_loss) / 2
+            D_total_loss = (D_real_loss + D_fake_loss)
 
             # update the discriminator D
             d_optimizer.zero_grad()
@@ -195,19 +199,26 @@ def training_loop(train_dataloader, opts):
 
             # FILL THIS IN
             # 1. Sample noise
-            noise = torch.randn(batch_size, 100, 1, 1)
+            # noise = torch.randn(batch_size, 100, 1, 1)
+            noise = sample_noise(100)
 
             # 2. Generate fake images from the noise
-            fake_images = G(noise)
+            fake_images = G.forward(noise)
 
             # 3. Compute the generator loss
-            G_loss = torch.mean((D(fake_images.detach()) - 1) ** 2)
+            G_loss = torch.mean((D(fake_images) - 1) ** 2)
 
             # update the generator G
             g_optimizer.zero_grad()
             G_loss.backward()
             g_optimizer.step()
             G.train()
+            # with open('dump.txt', mode='a') as f:
+                    #     for name, param in G.named_parameters():
+                    #         if param.requires_grad:
+                    #             f.write(name + str(param.data))
+                    # f.write(str([x.grad for x in g_optimizer.param_groups[0]['params']]))
+                    # f.write('\n')
 
             # Print the log info
             if iteration % opts.log_step == 0:
