@@ -49,9 +49,9 @@ def get_data_loader(data_path, opts):
         # transforms.RandomHorizontalFlip()
         train_transform = transforms.Compose([
             transforms.Resize(opts.image_size , Image.BICUBIC),
-           transforms.CenterCrop(opts.image_size),
+            transforms.CenterCrop(opts.image_size),
             transforms.ToTensor(),
-            # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])
 
     dataset = CustomDataSet(os.path.join('data/', data_path), opts.ext, train_transform)

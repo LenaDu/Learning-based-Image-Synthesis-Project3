@@ -104,7 +104,11 @@ def save_samples(G, fixed_noise, iteration, opts):
     print(fixed_noise.shape)
 
     generated_images = G(fixed_noise)
+
+    # print("size1:", generated_images.shape)
+
     generated_images = utils.to_data(generated_images)
+    # print("size2:", generated_images.shape)
 
     grid = create_image_grid(generated_images)
 
@@ -170,6 +174,10 @@ def training_loop(train_dataloader, opts):
             ################################################
             ###         TRAIN THE DISCRIMINATOR         ####
             ################################################
+
+            # print("max:", torch.max(real_images))
+            # print("min:", torch.min(real_images))
+            # print("mean:", torch.mean(real_images))
 
             # FILL THIS IN
             # 1. Compute the discriminator loss on real images

@@ -58,11 +58,12 @@ class DCGenerator(nn.Module):
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
 
-        self.up_conv1 = conv(in_channels=100, out_channels=256, stride=1, kernel_size=2, padding=2, norm='instance')
+        # self.up_conv1 = conv(in_channels=100, out_channels=256, stride=1, kernel_size=2, padding=2, norm='instance')
+        self.up_conv1 = up_conv(in_channels=100, out_channels=256, kernel_size=3, padding=1, scale_factor=4, norm='instance')
         self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=3, padding=1, norm='instance')
         self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=3, padding=1, norm='instance')
         self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=3, padding=1, norm='instance')
-        self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=3, padding=1)
+        self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=3, padding=1, norm='none')
 
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
@@ -82,6 +83,7 @@ class DCGenerator(nn.Module):
         ###########################################
         ##   FILL THIS IN: FORWARD PASS   ##
         ###########################################
+
         z = self.up_conv1(z)
         z = self.relu(z)
         # print("after layer1: ", z.shape)
@@ -175,6 +177,7 @@ class DCDiscriminator(nn.Module):
         self.conv5 = nn.Conv2d(in_channels=256, out_channels=1, padding=0, kernel_size=4)
 
         self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
 
@@ -194,6 +197,7 @@ class DCDiscriminator(nn.Module):
         x = self.relu(x)
 
         x = self.conv5(x)
+        x = self.sigmoid(x)
 
         return x
 
