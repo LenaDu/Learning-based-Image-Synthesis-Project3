@@ -101,7 +101,7 @@ def checkpoint(iteration, G, D, opts):
 
 def save_samples(G, fixed_noise, iteration, opts):
 
-    print(fixed_noise.shape)
+    # print(fixed_noise.shape)
 
     generated_images = G(fixed_noise)
 
