@@ -61,22 +61,22 @@ class DCGenerator(nn.Module):
         # self.up_conv1 = conv(in_channels=100, out_channels=256, stride=1, kernel_size=2, padding=2, norm='instance')
         # self.up_conv1 = up_conv(in_channels=100, out_channels=256, kernel_size=3, padding=1, scale_factor=4, norm='instance')
         # #in: 100 * 1 * 1
-        self.up_conv1 = conv(in_channels=100, out_channels=1024, kernel_size=4, stride=1, padding=3, norm='instance')
-        # # -> 256 * 4 * 4
-        # self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=4, stride=2, padding=3, norm='instance')
-        # # -> 128 * 8 * 8
-        # self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=3, norm='instance')
-        # # -> 64 * 16 * 16
-        # self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=4, stride=2, padding=3, norm='instance')
-        # # -> 32 * 32 * 32
-        # self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=4, stride=2, padding=3, norm='none')
-        # # -> 3 * 64 * 64
+        self.up_conv1 = conv(in_channels=100, out_channels=256, kernel_size=4, stride=1, padding=3, norm='instance')
+        # -> 256 * 4 * 4
+        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=4, stride=2, padding=1, scale_factor=4, norm='instance')
+        # -> 128 * 8 * 8
+        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=1, scale_factor=4, norm='instance')
+        # -> 64 * 16 * 16
+        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=4, stride=2, padding=1, scale_factor=4, norm='instance')
+        # -> 32 * 32 * 32
+        self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=4, stride=2, padding=1, scale_factor=4, norm='none')
+        # -> 3 * 64 * 64
 
         # self.up_conv1 = up_conv(in_channels=100, out_channels=256, kernel_size=3, padding=1, scale_factor=4, norm='instance')
-        self.up_conv2 = up_conv(in_channels=1024, out_channels=512, kernel_size=3, padding=1, norm='instance')
-        self.up_conv3 = up_conv(in_channels=512, out_channels=256, kernel_size=3, padding=1, norm='instance')
-        self.up_conv4 = up_conv(in_channels=256, out_channels=128, kernel_size=3, padding=1, norm='instance')
-        self.up_conv5 = up_conv(in_channels=128, out_channels=3, kernel_size=3, padding=1, norm='none')
+        # self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=3, padding=1, norm='instance')
+        # self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=3, padding=1, norm='instance')
+        # self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=3, padding=1, norm='instance')
+        # self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=3, padding=1, norm='none')
 
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
@@ -187,23 +187,23 @@ class DCDiscriminator(nn.Module):
         ###########################################
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
-        # # in: 3 * 64 * 64
-        # self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=2, kernel_size=4, norm='instance')
-        # # -> 32 * 32 * 32
-        # self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=2, kernel_size=4, norm='instance')
-        # # -> 64 * 16 * 16
-        # self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4, norm='instance')
-        # # -> 128 * 8 * 8
-        # self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=2, kernel_size=4, norm='instance')
-        # # -> 256 * 4 * 4
-        # self.conv5 = conv(in_channels=256, out_channels=1, padding=0, stride=2, kernel_size=4, norm='none')
-        # # -> 1 * 1 *1
+        # in: 3 * 64 * 64
+        self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=2, kernel_size=4, norm='instance')
+        # -> 32 * 32 * 32
+        self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=2, kernel_size=4, norm='instance')
+        # -> 64 * 16 * 16
+        self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4, norm='instance')
+        # -> 128 * 8 * 8
+        self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=2, kernel_size=4, norm='instance')
+        # -> 256 * 4 * 4
+        self.conv5 = conv(in_channels=256, out_channels=1, padding=0, stride=2, kernel_size=4, norm='none')
+        # -> 1 * 1 *1
 
-        self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=1, kernel_size=4, norm='instance')
-        self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=1, kernel_size=4, norm='instance')
-        self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=1, kernel_size=4, norm='instance')
-        self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=1, kernel_size=4, norm='instance')
-        self.conv5 = nn.Conv2d(in_channels=256, out_channels=1, padding=0, kernel_size=4)
+        # self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=1, kernel_size=4, norm='instance')
+        # self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=1, kernel_size=4, norm='instance')
+        # self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=1, kernel_size=4, norm='instance')
+        # self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=1, kernel_size=4, norm='instance')
+        # self.conv5 = nn.Conv2d(in_channels=256, out_channels=1, padding=0, kernel_size=4)
 
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
