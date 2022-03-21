@@ -150,7 +150,7 @@ class CycleGenerator(nn.Module):
         # 3. Define the decoder part of the generator (that builds up the output image from features)
         self.up_conv1 = up_conv(in_channels=64, out_channels=32, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
         # ->  32 * 32 * 32
-        self.up_conv2 = up_conv(in_channels=32, out_channels=3, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
+        self.up_conv2 = up_conv(in_channels=32, out_channels=3, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='none')
         # ->   3 * 64 * 64
 
         self.relu = nn.ReLU()
@@ -272,7 +272,7 @@ class PatchDiscriminator(nn.Module):
         # -> 64 * 16 * 16
         self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4, norm='instance')
         # -> 128 * 8 * 8
-        self.conv4 = conv(in_channels=128, out_channels=1, padding=1, stride=2, kernel_size=4, norm='instance')
+        self.conv4 = conv(in_channels=128, out_channels=1, padding=1, stride=2, kernel_size=4, norm='none')
         # -> 1 * 4 * 4
 
         self.relu = nn.ReLU()
@@ -297,7 +297,7 @@ class PatchDiscriminator(nn.Module):
         # assert(x.shape[1:] == torch.Size([128, 8, 8]) and "d_conv3")
 
         x = self.conv4(x)
-        x = self.sigmoid(x)
+        # x = self.sigmoid(x)
         # assert(x.shape[1:] == torch.Size([1, 4, 4]) and "d_conv4")
 
         return x

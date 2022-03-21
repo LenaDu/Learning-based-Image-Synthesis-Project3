@@ -202,7 +202,7 @@ def training_loop(dataloader_X, dataloader_Y, opts):
 
         # 1. Compute the discriminator losses on real images
         D_X_loss = torch.mean((D_X(images_X) - 1) ** 2)
-        D_Y_loss = torch.mean(D_Y(images_Y - 1) ** 2)
+        D_Y_loss = torch.mean((D_Y(images_Y) - 1) ** 2)
 
         d_real_loss = D_X_loss + D_Y_loss
 
@@ -251,7 +251,7 @@ def training_loop(dataloader_X, dataloader_Y, opts):
 
         if opts.use_cycle_consistency_loss:
             # 3. Compute the cycle consistency loss (the reconstruction loss)
-            cycle_consistency_loss = torch.mean((images_Y - G_XtoY(fake_X)) ** 2)
+            cycle_consistency_loss = torch.mean(torch.abs(images_Y - G_XtoY(fake_X)))
 
             g_loss += opts.lambda_cycle * cycle_consistency_loss
             logger.add_scalar('G/XY/cycle', opts.lambda_cycle * cycle_consistency_loss, iteration)
@@ -269,7 +269,7 @@ def training_loop(dataloader_X, dataloader_Y, opts):
 
         if opts.use_cycle_consistency_loss:
             # 3. Compute the cycle consistency loss (the reconstruction loss)
-            cycle_consistency_loss = torch.mean((images_X - G_YtoX(fake_Y)) ** 2)
+            cycle_consistency_loss = torch.mean(torch.abs(images_X - G_YtoX(fake_Y)))
 
             g_loss += opts.lambda_cycle * cycle_consistency_loss
             logger.add_scalar('G/YX/cycle', cycle_consistency_loss, iteration)
