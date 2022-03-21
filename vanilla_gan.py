@@ -138,7 +138,7 @@ def sample_noise(dim):
     - A PyTorch Variable of shape (batch_size, dim, 1, 1) containing uniform
       random noise in the range (-1, 1).
     """
-    return utils.to_var(torch.rand(*dim) * 2 - 1).unsqueeze(2).unsqueeze(3)
+    return utils.to_var(torch.rand(batch_size, dim) * 2 - 1).unsqueeze(2).unsqueeze(3)
 
 
 def training_loop(train_dataloader, opts):
@@ -156,7 +156,7 @@ def training_loop(train_dataloader, opts):
     d_optimizer = optim.Adam(D.parameters(), opts.lr, [opts.beta1, opts.beta2])
 
     # Generate fixed noise for sampling from the generator
-    fixed_noise = sample_noise((batch_size, opts.noise_size))  # batch_size x noise_size x 1 x 1
+    fixed_noise = sample_noise(opts.noise_size)  # batch_size x noise_size x 1 x 1
 
     # print(fixed_noise)
     iteration = 1
@@ -187,7 +187,7 @@ def training_loop(train_dataloader, opts):
             # 2. Sample noise
             # print(real_images.size)
             # noise = torch.randn(batch_size, 100, 1, 1, requires_grad=True)
-            noise = sample_noise((batch_size, opts.noise_size))
+            noise = sample_noise(opts.noise_size)
 
             # 3. Generate fake images from the noise
             fake_images = G.forward(noise)
@@ -202,7 +202,6 @@ def training_loop(train_dataloader, opts):
             d_optimizer.zero_grad()
             D_total_loss.backward()
             d_optimizer.step()
-            D.train()
 
             ###########################################
             ###          TRAIN THE GENERATOR        ###
@@ -211,7 +210,7 @@ def training_loop(train_dataloader, opts):
             # FILL THIS IN
             # 1. Sample noise
             # noise = torch.randn(batch_size, 100, 1, 1)
-            noise = sample_noise((batch_size, opts.noise_size))
+            noise = sample_noise(opts.noise_size)
 
             # 2. Generate fake images from the noise
             fake_images = G.forward(noise)

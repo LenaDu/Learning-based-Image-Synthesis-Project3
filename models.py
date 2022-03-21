@@ -58,28 +58,21 @@ class DCGenerator(nn.Module):
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
 
-        # self.up_conv1 = conv(in_channels=100, out_channels=256, stride=1, kernel_size=2, padding=2, norm='instance')
-        # self.up_conv1 = up_conv(in_channels=100, out_channels=256, kernel_size=3, padding=1, scale_factor=4, norm='instance')
         # #in: 100 * 1 * 1
         self.up_conv1 = conv(in_channels=100, out_channels=256, kernel_size=4, stride=1, padding=3, norm='instance')
         # -> 256 * 4 * 4
-        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=4, stride=2, padding=1, scale_factor=4, norm='instance')
+        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
         # -> 128 * 8 * 8
-        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=4, stride=2, padding=1, scale_factor=4, norm='instance')
+        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
         # -> 64 * 16 * 16
-        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=4, stride=2, padding=1, scale_factor=4, norm='instance')
+        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
         # -> 32 * 32 * 32
-        self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=4, stride=2, padding=1, scale_factor=4, norm='none')
+        self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='none')
         # -> 3 * 64 * 64
-
-        # self.up_conv1 = up_conv(in_channels=100, out_channels=256, kernel_size=3, padding=1, scale_factor=4, norm='instance')
-        # self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=3, padding=1, norm='instance')
-        # self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=3, padding=1, norm='instance')
-        # self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=3, padding=1, norm='instance')
-        # self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=3, padding=1, norm='none')
 
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
+        self.lrelu = nn.LeakyReLU(0.2, True)
 
     def forward(self, z):
         """Generates an image given a sample of random noise.
@@ -98,23 +91,19 @@ class DCGenerator(nn.Module):
         ###########################################
 
         z = self.up_conv1(z)
-        z = self.relu(z)
-        # print("after layer1: ", z.shape)
+        z = self.lrelu(z)
         # assert(z.shape[1:] == torch.Size([256, 4, 4]) and "g_conv1")
 
         z = self.up_conv2(z)
-        z = self.relu(z)
-        # print("after layer2: ", z.shape)
+        z = self.lrelu(z)
         # assert(z.shape[1:] == torch.Size([128, 8, 8]) and "g_conv2")
 
         z = self.up_conv3(z)
-        z = self.relu(z)
-        # print("after layer3: ", z.shape)
+        z = self.lrelu(z)
         # assert(z.shape[1:] == torch.Size([64, 16, 16]) and "g_conv3")
 
         z = self.up_conv4(z)
-        z = self.relu(z)
-        # print("after layer4: ", z.shape)
+        z = self.lrelu(z)
         # assert(z.shape[1:] == torch.Size([32, 32, 32]) and "g_conv4")
 
         z = self.up_conv5(z)
@@ -147,16 +136,25 @@ class CycleGenerator(nn.Module):
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
 
-        # # 1. Define the encoder part of the generator (that extracts features from the input image)
-        # self.conv1 =
-        # self.conv2 =
-        #
-        # # 2. Define the transformation part of the generator
-        # self.resnet_block =
-        #
-        # # 3. Define the decoder part of the generator (that builds up the output image from features)
-        # self.up_conv1 =
-        # self.up_conv2 =
+        # 1. Define the encoder part of the generator (that extracts features from the input image)
+        # in: 3 * 64 * 64
+        self.conv1 = conv(in_channels=3, out_channels=32, kernel_size=4, stride=2, padding=1, norm='instance')
+        # ->  32 * 32 * 32
+        self.conv2 = conv(in_channels=32, out_channels=64, kernel_size=4, stride=2, padding=1, norm='instance')
+        # ->  64 * 16 * 16
+
+        # 2. Define the transformation part of the generator
+        self.resnet_block = ResnetBlock(conv_dim=64, norm=norm)
+        # ->  64 * 16 * 16
+
+        # 3. Define the decoder part of the generator (that builds up the output image from features)
+        self.up_conv1 = up_conv(in_channels=64, out_channels=32, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
+        # ->  32 * 32 * 32
+        self.up_conv2 = up_conv(in_channels=32, out_channels=3, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
+        # ->   3 * 64 * 64
+
+        self.relu = nn.ReLU()
+        self.tanh = nn.Tanh()
 
     def forward(self, x):
         """Generates an image conditioned on an input image.
@@ -174,7 +172,31 @@ class CycleGenerator(nn.Module):
         ##   FILL THIS IN: FORWARD PASS   ##
         ###########################################
 
-        pass
+        x = self.conv1(x)
+        x = self.relu(x)
+        assert(x.shape[1:] == torch.Size([32, 32, 32]), x.shape[1:])
+        # print(x.shape[1:], 'G_conv1')
+
+        x = self.conv2(x)
+        x = self.relu(x)
+        assert(x.shape[1:] == torch.Size([64, 16, 16]), x.shape[1:])
+        # print(x.shape[1:], 'G_conv2')
+
+        x = self.resnet_block(x)
+        x = self.resnet_block(x)
+        x = self.resnet_block(x)
+        x = self.relu(x)
+        # print(x.shape[1:], 'G_conv3')
+
+        x = self.up_conv1(x)
+        x = self.relu(x)
+        # print(x.shape[1:], 'G_conv4')
+
+        x = self.up_conv2(x)
+        x = self.tanh(x)
+        # print(x.shape[1:], 'G_conv5')
+
+        return x
 
 
 class DCDiscriminator(nn.Module):
@@ -199,11 +221,6 @@ class DCDiscriminator(nn.Module):
         self.conv5 = conv(in_channels=256, out_channels=1, padding=0, stride=2, kernel_size=4, norm='none')
         # -> 1 * 1 *1
 
-        # self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=1, kernel_size=4, norm='instance')
-        # self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=1, kernel_size=4, norm='instance')
-        # self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=1, kernel_size=4, norm='instance')
-        # self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=1, kernel_size=4, norm='instance')
-        # self.conv5 = nn.Conv2d(in_channels=256, out_channels=1, padding=0, kernel_size=4)
 
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
@@ -215,7 +232,6 @@ class DCDiscriminator(nn.Module):
         ###########################################
         x = self.conv1(x)
         x = self.relu(x)
-        # print(x.shape[1:])
         # assert(x.shape[1:] == torch.Size([32, 32, 32]) and "d_conv1")
 
         x = self.conv2(x)
@@ -249,7 +265,18 @@ class PatchDiscriminator(nn.Module):
         ###########################################
 
         # Hint: it should look really similar to DCDiscriminator.
+        # in: 3 * 64 * 64
+        self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=2, kernel_size=4, norm='instance')
+        # -> 32 * 32 * 32
+        self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=2, kernel_size=4, norm='instance')
+        # -> 64 * 16 * 16
+        self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4, norm='instance')
+        # -> 128 * 8 * 8
+        self.conv4 = conv(in_channels=128, out_channels=1, padding=1, stride=2, kernel_size=4, norm='instance')
+        # -> 1 * 4 * 4
 
+        self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
 
@@ -257,4 +284,20 @@ class PatchDiscriminator(nn.Module):
         ##   FILL THIS IN: FORWARD PASS   ##
         ###########################################
 
-        pass
+        x = self.conv1(x)
+        x = self.relu(x)
+        # assert(x.shape[1:] == torch.Size([32, 32, 32]) and "d_conv1")
+
+        x = self.conv2(x)
+        x = self.relu(x)
+        # assert(x.shape[1:] == torch.Size([64, 16, 16]) and "d_conv2")
+
+        x = self.conv3(x)
+        x = self.relu(x)
+        # assert(x.shape[1:] == torch.Size([128, 8, 8]) and "d_conv3")
+
+        x = self.conv4(x)
+        x = self.sigmoid(x)
+        # assert(x.shape[1:] == torch.Size([1, 4, 4]) and "d_conv4")
+
+        return x
