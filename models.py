@@ -25,7 +25,10 @@ def up_conv(in_channels, out_channels, kernel_size, stride=1, padding=1, scale_f
     """
     layers = []
     layers.append(nn.Upsample(scale_factor=scale_factor, mode='nearest'))
-    layers.append(nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=False))
+    if norm == 'spectral':
+        layers.append(nn.utils.spectral_norm(nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=False)))
+    else:
+        layers.append(nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=False))
     if norm == 'batch':
         layers.append(nn.BatchNorm2d(out_channels))
     elif norm == 'instance':
@@ -38,7 +41,12 @@ def conv(in_channels, out_channels, kernel_size, stride=2, padding=1, norm='batc
     """Creates a convolutional layer, with optional batch normalization.
     """
     layers = []
-    conv_layer = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+    if norm == 'spectral':
+        conv_layer = nn.utils.spectral_norm(nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size,
+                               stride=stride, padding=padding, bias=False))
+    else:
+        conv_layer = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+
     if init_zero_weights:
         conv_layer.weight.data = torch.randn(out_channels, in_channels, kernel_size, kernel_size) * 0.001
     layers.append(conv_layer)
@@ -51,21 +59,20 @@ def conv(in_channels, out_channels, kernel_size, stride=2, padding=1, norm='batc
 
 
 class DCGenerator(nn.Module):
-    def __init__(self, noise_size, conv_dim):
+    def __init__(self, noise_size, conv_dim, norm='instance'):
         super(DCGenerator, self).__init__()
 
         ###########################################
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
-
         # #in: 100 * 1 * 1
-        self.up_conv1 = conv(in_channels=100, out_channels=256, kernel_size=4, stride=1, padding=3, norm='instance')
+        self.up_conv1 = conv(in_channels=100, out_channels=256, kernel_size=4, stride=1, padding=3, norm=norm)
         # -> 256 * 4 * 4
-        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
+        self.up_conv2 = up_conv(in_channels=256, out_channels=128, kernel_size=3, stride=1, padding=1, scale_factor=2, norm=norm)
         # -> 128 * 8 * 8
-        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
+        self.up_conv3 = up_conv(in_channels=128, out_channels=64, kernel_size=3, stride=1, padding=1, scale_factor=2, norm=norm)
         # -> 64 * 16 * 16
-        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='instance')
+        self.up_conv4 = up_conv(in_channels=64, out_channels=32, kernel_size=3, stride=1, padding=1, scale_factor=2, norm=norm)
         # -> 32 * 32 * 32
         self.up_conv5 = up_conv(in_channels=32, out_channels=3, kernel_size=3, stride=1, padding=1, scale_factor=2, norm='none')
         # -> 3 * 64 * 64
@@ -203,20 +210,21 @@ class DCDiscriminator(nn.Module):
     """Defines the architecture of the discriminator network.
        Note: Both discriminators D_X and D_Y have the same architecture in this assignment.
     """
-    def __init__(self, conv_dim=64, norm='batch'):
+    def __init__(self, conv_dim=64, norm='instance'):
         super(DCDiscriminator, self).__init__()
 
         ###########################################
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
+
         # in: 3 * 64 * 64
-        self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=2, kernel_size=4, norm='instance')
+        self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=2, kernel_size=4, norm=norm)
         # -> 32 * 32 * 32
-        self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=2, kernel_size=4, norm='instance')
+        self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=2, kernel_size=4, norm=norm)
         # -> 64 * 16 * 16
-        self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4, norm='instance')
+        self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4, norm=norm)
         # -> 128 * 8 * 8
-        self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=2, kernel_size=4, norm='instance')
+        self.conv4 = conv(in_channels=128, out_channels=256, padding=1, stride=2, kernel_size=4, norm=norm)
         # -> 256 * 4 * 4
         self.conv5 = conv(in_channels=256, out_channels=1, padding=0, stride=2, kernel_size=4, norm='none')
         # -> 1 * 1 *1
@@ -247,7 +255,7 @@ class DCDiscriminator(nn.Module):
         # assert(x.shape[1:] == torch.Size([256, 4, 4]) and "d_conv4")
 
         x = self.conv5(x)
-        x = self.sigmoid(x)
+        # x = self.sigmoid(x) # Comment this if using CycleGAN
         # assert(x.shape[1:] == torch.Size([1, 1, 1]) and "d_conv5")
 
         return x

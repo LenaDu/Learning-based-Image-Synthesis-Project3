@@ -163,6 +163,7 @@ def training_loop(dataloader_X, dataloader_Y, opts):
     g_params = list(G_XtoY.parameters()) + list(G_YtoX.parameters())  # Get generator parameters
     d_params = list(D_X.parameters()) + list(D_Y.parameters())  # Get discriminator parameters
 
+
     # Create optimizers for the generators and discriminators
     g_optimizer = optim.Adam(g_params, opts.lr, [opts.beta1, opts.beta2])
     d_optimizer = optim.Adam(d_params, opts.lr, [opts.beta1, opts.beta2])
@@ -277,7 +278,7 @@ def training_loop(dataloader_X, dataloader_Y, opts):
             fake_Y = DiffAugment(fake_Y, policy=diffaug_policy)
 
         # 2. Compute the generator loss based on domain Y
-        g_loss = torch.mean((D_Y(fake_Y) - 1) ** 2)
+        g_loss += torch.mean((D_Y(fake_Y) - 1) ** 2)
         logger.add_scalar('G/YX/fake', g_loss, iteration)
 
         if opts.use_cycle_consistency_loss:

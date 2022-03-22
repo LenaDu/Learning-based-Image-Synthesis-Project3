@@ -59,8 +59,8 @@ def print_models(G, D):
 def create_model(opts):
     """Builds the generators and discriminators.
     """
-    G = DCGenerator(noise_size=opts.noise_size, conv_dim=opts.conv_dim)
-    D = DCDiscriminator(conv_dim=opts.conv_dim)
+    G = DCGenerator(noise_size=opts.noise_size, conv_dim=opts.conv_dim, norm=opts.norm)
+    D = DCDiscriminator(conv_dim=opts.conv_dim, norm=opts.norm)
 
     print_models(G, D)
 
@@ -280,7 +280,7 @@ def create_parser():
 
     # Model hyper-parameters
     parser.add_argument('--image_size', type=int, default=64, help='The side length N to convert images to NxN.')
-    parser.add_argument('--conv_dim', type=int, default=32)
+    parser.add_argument('--conv_dim', type=int, default=64)
     parser.add_argument('--noise_size', type=int, default=100)
 
     # Training hyper-parameters
@@ -302,6 +302,7 @@ def create_parser():
     parser.add_argument('--log_step', type=int, default=10)
     parser.add_argument('--sample_every', type=int, default=200)
     parser.add_argument('--checkpoint_every', type=int, default=400)
+    parser.add_argument('--norm', type=str, default='instance')
 
     parser.add_argument('--use_diffaug', action='store_true', default=False, help='Choose whether to use diffaug.')
 
@@ -314,15 +315,19 @@ if __name__ == '__main__':
 
     diffaug_policy = 'color,translation,cutout'
 
+
     batch_size = opts.batch_size
     opts.sample_dir = os.path.join('output/', opts.sample_dir,
                                    '%s_%s' % (os.path.basename(opts.data), opts.data_preprocess))
     if opts.use_diffaug:
         opts.sample_dir += '_diffaug' + diffaug_policy
 
+    if opts.norm == 'spectral':
+        opts.sample_dir += '_spectral'
+
     if os.path.exists(opts.sample_dir):
-        cmd = 'rm %s/*' % opts.sample_dir
-        # cmd = 'del %s' % opts.sample_dir.replace('./','').replace('/','\\') # able to run on Windows
+        # cmd = 'rm %s/*' % opts.sample_dir
+        cmd = 'del %s' % opts.sample_dir.replace('./','').replace('/','\\') # able to run on Windows
         os.system(cmd)
     logger = SummaryWriter(opts.sample_dir)
     print(opts)
