@@ -192,6 +192,10 @@ def training_loop(dataloader_X, dataloader_Y, opts):
         images_Y, labels_Y = utils.to_var(images_Y), utils.to_var(labels_Y).long().squeeze()
 
 
+        if opts.use_diffaug:
+            images_X = DiffAugment(images_X, policy=diffaug_policy)
+            images_Y = DiffAugment(images_Y, policy=diffaug_policy)
+
         # ============================================
         #            TRAIN THE DISCRIMINATORS
         # ============================================
@@ -203,17 +207,22 @@ def training_loop(dataloader_X, dataloader_Y, opts):
         # 1. Compute the discriminator losses on real images
         D_X_loss = torch.mean((D_X(images_X) - 1) ** 2)
         D_Y_loss = torch.mean((D_Y(images_Y) - 1) ** 2)
+        # D_Y_loss = torch.mean(D_Y(images_Y - 1) ** 2)
 
         d_real_loss = D_X_loss + D_Y_loss
 
         # 2. Generate fake images that look like domain X based on real images in domain Y
         fake_X = G_YtoX(images_Y)
+        if opts.use_diffaug:
+            fake_X = DiffAugment(fake_X, policy=diffaug_policy)
 
         # 3. Compute the loss for D_X
         D_X_loss = torch.mean(D_X(fake_X) ** 2)
 
         # 4. Generate fake images that look like domain Y based on real images in domain X
         fake_Y = G_XtoY(images_X)
+        if opts.use_diffaug:
+            fake_Y = DiffAugment(fake_Y, policy=diffaug_policy)
 
         # 5. Compute the loss for D_Y
         D_Y_loss = torch.mean(D_Y(fake_Y) ** 2)
@@ -244,6 +253,8 @@ def training_loop(dataloader_X, dataloader_Y, opts):
 
         # 1. Generate fake images that look like domain X based on real images in domain Y
         fake_X = G_YtoX(images_Y)
+        if opts.use_diffaug:
+            fake_X = DiffAugment(fake_X, policy=diffaug_policy)
 
         # 2. Compute the generator loss based on domain X
         g_loss = torch.mean((D_X(fake_X) - 1) ** 2)
@@ -262,6 +273,8 @@ def training_loop(dataloader_X, dataloader_Y, opts):
 
         # 1. Generate fake images that look like domain Y based on real images in domain X
         fake_Y = G_XtoY(images_X)
+        if opts.use_diffaug:
+            fake_Y = DiffAugment(fake_Y, policy=diffaug_policy)
 
         # 2. Compute the generator loss based on domain Y
         g_loss = torch.mean((D_Y(fake_Y) - 1) ** 2)
@@ -332,8 +345,8 @@ def create_parser():
     parser.add_argument('--image_size', type=int, default=64, help='The side length N to convert images to NxN.')
     parser.add_argument('--disc', type=str, default='dc', help='Choose which discriminator to use. choices:[dc|patch]')
     parser.add_argument('--gen', type=str, default='cycle')
-    parser.add_argument('--g_conv_dim', type=int, default=32)
-    parser.add_argument('--d_conv_dim', type=int, default=32)
+    parser.add_argument('--g_conv_dim', type=int, default=64)
+    parser.add_argument('--d_conv_dim', type=int, default=64)
     parser.add_argument('--norm', type=str, default='instance')
     parser.add_argument('--use_cycle_consistency_loss', action='store_true', default=False, help='Choose whether to include the cycle consistency term in the loss.')
     parser.add_argument('--init_zero_weights', action='store_true', default=False, help='Choose whether to initialize the generator conv weights to 0 (implements the identity function).')
@@ -363,20 +376,25 @@ def create_parser():
 
     parser.add_argument('--gpu', type=str, default='0')
 
+    parser.add_argument('--use_diffaug', action='store_true', default=False, help='Choose whether to use diffaug.')
+
     return parser
 
 
 if __name__ == '__main__':
     parser = create_parser()
     opts = parser.parse_args()
+
+    diffaug_policy = 'color,translation,cutout'
+
     os.environ['CUDA_VISIBLE_DEVICES'] = opts.gpu
     opts.sample_dir = os.path.join('output/', opts.sample_dir,
                                    '%s_%g' % (opts.X.split('/')[0], opts.lambda_cycle))
     opts.sample_dir += '%s_%s_%s_%s_%s' % (opts.data_preprocess, opts.norm, opts.disc, opts.gen, opts.init_type)
     if opts.use_cycle_consistency_loss:
         opts.sample_dir += '_cycle'
-    # if opts.use_diffaug:
-    #     opts.sample_dir += '_diffaug'
+    if opts.use_diffaug:
+        opts.sample_dir += '_diffaug' + diffaug_policy
 
     if os.path.exists(opts.sample_dir):
         cmd = 'rm %s/*' % opts.sample_dir

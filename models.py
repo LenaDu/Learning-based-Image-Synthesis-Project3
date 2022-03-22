@@ -266,17 +266,16 @@ class PatchDiscriminator(nn.Module):
 
         # Hint: it should look really similar to DCDiscriminator.
         # in: 3 * 64 * 64
-        self.conv1 = conv(in_channels=3, out_channels=32, padding=1, stride=2, kernel_size=4, norm='instance')
+        self.conv1 = conv(in_channels=3, out_channels=64, padding=1, stride=2, kernel_size=4, norm='instance')
         # -> 32 * 32 * 32
-        self.conv2 = conv(in_channels=32, out_channels=64, padding=1, stride=2, kernel_size=4, norm='instance')
+        self.conv2 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4, norm='instance')
         # -> 64 * 16 * 16
-        self.conv3 = conv(in_channels=64, out_channels=128, padding=1, stride=2, kernel_size=4, norm='instance')
+        self.conv3 = conv(in_channels=128, out_channels=256, padding=1, stride=2, kernel_size=4, norm='instance')
         # -> 128 * 8 * 8
-        self.conv4 = conv(in_channels=128, out_channels=1, padding=1, stride=2, kernel_size=4, norm='none')
+        self.conv4 = conv(in_channels=256, out_channels=1, padding=1, stride=2, kernel_size=4, norm='none')
         # -> 1 * 4 * 4
 
         self.relu = nn.ReLU()
-        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
 
@@ -297,7 +296,6 @@ class PatchDiscriminator(nn.Module):
         # assert(x.shape[1:] == torch.Size([128, 8, 8]) and "d_conv3")
 
         x = self.conv4(x)
-        # x = self.sigmoid(x)
         # assert(x.shape[1:] == torch.Size([1, 4, 4]) and "d_conv4")
 
         return x

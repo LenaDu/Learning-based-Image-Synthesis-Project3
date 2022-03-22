@@ -182,6 +182,8 @@ def training_loop(train_dataloader, opts):
             # FILL THIS IN
             # 1. Compute the discriminator loss on real images
             # D_real_loss = torch.mean((D(real_images) - 1)**2)
+            if opts.use_diffaug:
+                real_images = DiffAugment(real_images, policy=diffaug_policy)
             D_real_loss = torch.mean((D(real_images) - 1)**2, dim=0, keepdim=False)
 
             # 2. Sample noise
@@ -191,6 +193,9 @@ def training_loop(train_dataloader, opts):
 
             # 3. Generate fake images from the noise
             fake_images = G.forward(noise)
+            if opts.use_diffaug:
+                fake_images = DiffAugment(fake_images, policy=diffaug_policy)
+
 
             # 4. Compute the discriminator loss on the fake images
             # D_fake_loss = torch.mean((D(fake_images.detach())) ** 2)
@@ -214,6 +219,8 @@ def training_loop(train_dataloader, opts):
 
             # 2. Generate fake images from the noise
             fake_images = G.forward(noise)
+            if opts.use_diffaug:
+                fake_images = DiffAugment(fake_images, policy=diffaug_policy)
 
             # 3. Compute the generator loss
             G_loss = torch.mean((D(fake_images) - 1) ** 2, dim=0, keepdim=False)
@@ -292,9 +299,11 @@ def create_parser():
     # Directories and checkpoint/sample iterations
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints_vanilla')
     parser.add_argument('--sample_dir', type=str, default='./vanilla')
-    parser.add_argument('--log_step', type=int , default=10)
-    parser.add_argument('--sample_every', type=int , default=200)
-    parser.add_argument('--checkpoint_every', type=int , default=400)
+    parser.add_argument('--log_step', type=int, default=10)
+    parser.add_argument('--sample_every', type=int, default=200)
+    parser.add_argument('--checkpoint_every', type=int, default=400)
+
+    parser.add_argument('--use_diffaug', action='store_true', default=False, help='Choose whether to use diffaug.')
 
     return parser
 
@@ -303,15 +312,17 @@ if __name__ == '__main__':
     parser = create_parser()
     opts = parser.parse_args()
 
+    diffaug_policy = 'color,translation,cutout'
+
     batch_size = opts.batch_size
     opts.sample_dir = os.path.join('output/', opts.sample_dir,
                                    '%s_%s' % (os.path.basename(opts.data), opts.data_preprocess))
-    # if opts.use_diffaug:
-    #     opts.sample_dir += '_diffaug'
+    if opts.use_diffaug:
+        opts.sample_dir += '_diffaug' + diffaug_policy
 
     if os.path.exists(opts.sample_dir):
-        # cmd = 'rm %s/*' % opts.sample_dir
-        cmd = 'del %s' % opts.sample_dir.replace('./','').replace('/','\\') # able to run on Windows
+        cmd = 'rm %s/*' % opts.sample_dir
+        # cmd = 'del %s' % opts.sample_dir.replace('./','').replace('/','\\') # able to run on Windows
         os.system(cmd)
     logger = SummaryWriter(opts.sample_dir)
     print(opts)
