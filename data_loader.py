@@ -42,7 +42,7 @@ def get_data_loader(data_path, opts):
         train_transform = basic_transform
     elif opts.data_preprocess == 'deluxe':
         # todo: add your code here: below are some ideas for your reference
-        load_size = int(1.1 * opts.image_size)
+        load_size = int(1.2 * opts.image_size)
         osize = [load_size, load_size]
         # transforms.Resize(osize, Image.BICUBIC)
         # transforms.RandomCrop(opts.image_size)

@@ -163,10 +163,20 @@ def training_loop(dataloader_X, dataloader_Y, opts):
     g_params = list(G_XtoY.parameters()) + list(G_YtoX.parameters())  # Get generator parameters
     d_params = list(D_X.parameters()) + list(D_Y.parameters())  # Get discriminator parameters
 
+    # g_x_params = list(G_XtoY.parameters())
+    # g_y_params = list(G_YtoX.parameters())
+    # d_x_params = list(D_X.parameters())
+    # d_y_params = list(D_Y.parameters())
+
 
     # Create optimizers for the generators and discriminators
     g_optimizer = optim.Adam(g_params, opts.lr, [opts.beta1, opts.beta2])
     d_optimizer = optim.Adam(d_params, opts.lr, [opts.beta1, opts.beta2])
+
+    # g_x_optimizer = optim.Adam(g_x_params, opts.lr, [opts.beta1, opts.beta2])
+    # g_y_optimizer = optim.Adam(g_y_params, opts.lr, [opts.beta1, opts.beta2])
+    # d_x_optimizer = optim.Adam(d_x_params, opts.lr, [opts.beta1, opts.beta2])
+    # d_y_optimizer = optim.Adam(d_y_params, opts.lr, [opts.beta1, opts.beta2])
 
     iter_X = iter(dataloader_X)
     iter_Y = iter(dataloader_Y)
@@ -208,7 +218,8 @@ def training_loop(dataloader_X, dataloader_Y, opts):
         # 1. Compute the discriminator losses on real images
         D_X_loss = torch.mean((D_X(images_X) - 1) ** 2)
         D_Y_loss = torch.mean((D_Y(images_Y) - 1) ** 2)
-        # D_Y_loss = torch.mean(D_Y(images_Y - 1) ** 2)
+        # D_X_real_loss = torch.mean((D_X(images_X) - 1) ** 2)
+        # D_Y_real_loss = torch.mean(D_Y(images_Y - 1) ** 2)
 
         d_real_loss = D_X_loss + D_Y_loss
 
@@ -236,6 +247,16 @@ def training_loop(dataloader_X, dataloader_Y, opts):
         d_total_loss.backward()
         d_optimizer.step()
 
+        # d_x_optimizer.zero_grad()
+        # d_x_total_loss = D_X_real_loss + D_X_loss
+        # d_x_total_loss.backward()
+        # d_x_optimizer.step()
+        #
+        # d_y_optimizer.zero_grad()
+        # d_y_total_loss = D_Y_real_loss + D_Y_loss
+        # d_y_total_loss.backward()
+        # d_y_optimizer.step()
+
         # plot the losses in tensorboard
         logger.add_scalar('D/XY/real', D_X_loss, iteration)
         logger.add_scalar('D/YX/real', D_Y_loss, iteration)
@@ -259,6 +280,7 @@ def training_loop(dataloader_X, dataloader_Y, opts):
 
         # 2. Compute the generator loss based on domain X
         g_loss = torch.mean((D_X(fake_X) - 1) ** 2)
+
         logger.add_scalar('G/XY/fake', g_loss, iteration)
 
         if opts.use_cycle_consistency_loss:
@@ -398,7 +420,8 @@ if __name__ == '__main__':
         opts.sample_dir += '_diffaug' + diffaug_policy
 
     if os.path.exists(opts.sample_dir):
-        cmd = 'rm %s/*' % opts.sample_dir
+        # cmd = 'rm %s/*' % opts.sample_dir
+        cmd = 'del %s' % opts.sample_dir.replace('./','').replace('/','\\') # able to run on Windows
         os.system(cmd)
 
     logger = SummaryWriter(opts.sample_dir)
